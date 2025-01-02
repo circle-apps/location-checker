@@ -38,8 +38,8 @@ export function useGoogleProvider({
   onError,
 }: GoogleProviderProps): LocationProvider {
   const [apiKey, setApiKey] = useState<string | null>(getStoredApiKey());
-  const [wifiNetworks, setWifiNetworks] = useState<WifiNetwork[]>([]);
-  const [cellTowers, setCellTowers] = useState<CellTower[]>([]);
+  const [wifiNetworks, _setWifiNetworks] = useState<WifiNetwork[]>([]);
+  const [cellTowers, _setCellTowers] = useState<CellTower[]>([]);
 
   useEffect(() => {
     if (useWifi) {
