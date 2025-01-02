@@ -8,12 +8,7 @@ interface NavigatorProviderProps {
   onError: (error: any) => void;
 }
 
-export function useNavigatorProvider({
-  gpsTimeout,
-  liveTracking,
-  onLocationUpdate,
-  onError,
-}: NavigatorProviderProps): LocationProvider {
+export function useNavigatorProvider({ gpsTimeout, liveTracking, onLocationUpdate }: NavigatorProviderProps): LocationProvider {
   const watchIdRef = useRef<number | null>(null);
 
   const cleanup = () => {
