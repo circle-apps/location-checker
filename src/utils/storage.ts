@@ -1,4 +1,4 @@
-const GOOGLE_API_KEY = "google_geolocation_api_key";
+const GOOGLE_API_KEY = 'google_geolocation_api_key';
 
 export const getStoredApiKey = (): string | null => {
   return localStorage.getItem(GOOGLE_API_KEY);
