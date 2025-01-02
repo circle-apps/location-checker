@@ -11,12 +11,14 @@ import 'leaflet/dist/leaflet.css';
 function App() {
   const [currentProvider, setCurrentProvider] = useState<string>('navigator');
   const currentProviderRef = useRef<string>('navigator');
+  const [tableData, setTableData] = useState({ ip: 0, navigator: 0, google: 0 });
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<{
     message: string;
     details: string;
   } | null>(null);
   const [liveTracking, setLiveTracking] = useState<boolean>(true);
+  const [viewSummary, setViewSummary] = useState<boolean>(false);
   const [gpsTimeout, setGpsTimeout] = useState<number>(10);
   const [useWifi, setUseWifi] = useState<boolean>(false);
   const [useCellular, setUseCellular] = useState<boolean>(false);
@@ -47,7 +49,7 @@ function App() {
       location: locationData,
       timestamp: new Date().toISOString(),
     });
-
+    setTableData((e) => ({ ...e, [locationData?.provider]: Math.round(locationData.accuracy) }));
     setLoading(false);
     setError(null);
     setLocation(locationData);
@@ -222,6 +224,15 @@ function App() {
     startLocationWatch();
   };
 
+  const handleNextProvider = () => {
+    setViewSummary(false);
+    const providerKeys = Object.keys(providers);
+    const currentIndex = providerKeys.indexOf(currentProvider);
+    const nextIndex = (currentIndex + 1) % providerKeys.length; // Loop back to the first provider
+    const nextProvider = providerKeys[nextIndex];
+    handleProviderChange(nextProvider);
+  };
+
   // Update the ref when state changes (for consistency)
   useEffect(() => {
     currentProviderRef.current = currentProvider;
@@ -253,6 +264,7 @@ function App() {
       providers[currentProviderRef.current].getLocation().catch(handleError);
     }
   }, [liveTracking, gpsTimeout]);
+  const isTableViewVisible = Object.values(tableData).every((value) => value > 0);
 
   return (
     <>
@@ -401,10 +413,47 @@ function App() {
               </svg>
               Refresh Location
             </button>
+            <div className="flex gap-4">
+              <button
+                onClick={handleNextProvider}
+                className={`${isTableViewVisible ? 'w-3/6' : 'w-full'} flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors`}
+              >
+                Next
+              </button>
+              {isTableViewVisible && (
+                <button
+                  onClick={() => setViewSummary(true)}
+                  className="w-3/6 flex items-center justify-center gap-2 px-4 py-3 bg-yellow-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Summary
+                </button>
+              )}
+            </div>
           </div>
         </div>
-
-        <Map loading={loading} error={error} location={location} />
+        {viewSummary ? (
+          <div className="p-5">
+            <h2 className="text-xl font-semibold text-center mb-2">Result Summary</h2>
+            <table className="min-w-full border border-gray-300 rounded-lg overflow-hidden">
+              <thead className="bg-gray-200">
+                <tr>
+                  <th className="p-4 text-left">Provider</th>
+                  <th className="p-4 text-left">Accuracy</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(tableData).map(([provider, accuracy]) => (
+                  <tr key={provider} className="hover:bg-gray-100">
+                    <td className="p-4 border-b border-gray-300">{provider}</td>
+                    <td className="p-4 border-b border-gray-300">{accuracy} meters</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <Map loading={loading} error={error} location={location} />
+        )}
       </div>
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </>
