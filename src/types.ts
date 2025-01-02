@@ -21,7 +21,7 @@ export class LocationError extends Error {
 
   constructor(message: string, userMessage: string, userDetails: string) {
     super(message);
-    this.name = "LocationError";
+    this.name = 'LocationError';
     this.userMessage = userMessage;
     this.userDetails = userDetails;
   }

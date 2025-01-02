@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "prepare": "husky install",
-    "format": "prettier --write src/**/*.{js,jsx,ts,tsx}"
+    "format": "prettier --write \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
     "@types/leaflet": "^1.9.15",

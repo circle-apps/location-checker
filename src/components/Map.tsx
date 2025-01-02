@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
-import L from "leaflet";
-import { LocationData } from "../types";
+import { useEffect, useRef } from 'react';
+import L from 'leaflet';
+import { LocationData } from '../types';
 
 interface MapProps {
   loading: boolean;
@@ -14,19 +14,19 @@ export function Map({ loading, error, location }: MapProps) {
   const circleRef = useRef<L.Circle | null>(null);
 
   useEffect(() => {
-    console.log("[Map] Initializing map");
+    console.log('[Map] Initializing map');
     if (!mapRef.current) {
-      mapRef.current = L.map("map").setView([0, 0], 2);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      mapRef.current = L.map('map').setView([0, 0], 2);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        attribution: "© OpenStreetMap contributors",
+        attribution: '© OpenStreetMap contributors',
       }).addTo(mapRef.current);
 
-      console.log("[Map] Map initialized");
+      console.log('[Map] Map initialized');
     }
 
     return () => {
-      console.log("[Map] Cleaning up map");
+      console.log('[Map] Cleaning up map');
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -43,11 +43,11 @@ export function Map({ loading, error, location }: MapProps) {
   // Update map when location changes
   useEffect(() => {
     if (!location || !mapRef.current) {
-      console.log("[Map] Skipping update - no location or map", { location });
+      console.log('[Map] Skipping update - no location or map', { location });
       return;
     }
 
-    console.log("[Map] Updating location on map", {
+    console.log('[Map] Updating location on map', {
       location,
       timestamp: new Date().toISOString(),
     });
@@ -55,29 +55,29 @@ export function Map({ loading, error, location }: MapProps) {
     const { lat, lon, accuracy } = location;
 
     if (!markerRef.current) {
-      console.log("[Map] Setting initial view", { lat, lon });
+      console.log('[Map] Setting initial view', { lat, lon });
       mapRef.current.setView([lat, lon], 15);
     }
 
     if (markerRef.current) {
-      console.log("[Map] Updating marker position");
+      console.log('[Map] Updating marker position');
       markerRef.current.setLatLng([lat, lon]);
     } else {
-      console.log("[Map] Creating new marker");
+      console.log('[Map] Creating new marker');
       markerRef.current = L.marker([lat, lon]).addTo(mapRef.current);
-      markerRef.current.bindPopup("You are here!").openPopup();
+      markerRef.current.bindPopup('You are here!').openPopup();
     }
 
     if (circleRef.current) {
-      console.log("[Map] Updating accuracy circle");
+      console.log('[Map] Updating accuracy circle');
       circleRef.current.setLatLng([lat, lon]);
       circleRef.current.setRadius(accuracy);
     } else {
-      console.log("[Map] Creating accuracy circle");
+      console.log('[Map] Creating accuracy circle');
       circleRef.current = L.circle([lat, lon], {
         radius: accuracy,
-        color: "#4285F4",
-        fillColor: "#4285F4",
+        color: '#4285F4',
+        fillColor: '#4285F4',
         fillOpacity: 0.15,
         weight: 1,
       }).addTo(mapRef.current);
@@ -98,9 +98,7 @@ export function Map({ loading, error, location }: MapProps) {
       {error && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/90 p-5 rounded-lg shadow-lg text-center max-w-md">
           <div className="text-red-600 mb-1">{error.message}</div>
-          <div className="text-sm text-gray-600 whitespace-pre-line">
-            {error.details}
-          </div>
+          <div className="text-sm text-gray-600 whitespace-pre-line">{error.details}</div>
         </div>
       )}
     </div>
