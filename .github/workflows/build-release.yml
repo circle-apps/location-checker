@@ -46,7 +46,9 @@ jobs:
 
   release:
     needs: build
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
     - uses: actions/checkout@v4
@@ -74,6 +76,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/main
-        asset_name: main
+        asset_path: dist/main.exe
+        asset_name: main.exe
         asset_content_type: application/octet-stream
