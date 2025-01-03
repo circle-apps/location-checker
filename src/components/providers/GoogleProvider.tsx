@@ -43,15 +43,26 @@ export function useGoogleProvider({
 
   useEffect(() => {
     if (useWifi) {
-      // Request WiFi networks if available
-      if ('getNetworkInformation' in navigator) {
-        // This is a placeholder as the Network Information API doesn't actually provide WiFi data
-        // In a real implementation, you'd need to use platform-specific APIs or a native bridge
-        console.warn('[Google Provider] WiFi scanning not available in browser');
+      try {
+        fetch('http://localhost:3000/api/networkInfo')
+          .then((resp) => resp.json())
+          .then((data) => {
+            _setWifiNetworks([data]);
+          });
+
+        // Request WiFi networks if available
+        // if ('getNetworkInformation' in navigator) {
+        //   // This is a placeholder as the Network Information API doesn't actually provide WiFi data
+        //   // In a real implementation, you'd need to use platform-specific APIs or a native bridge
+        //   console.warn('[Google Provider] WiFi scanning not available in browser');
+        // }
+      } catch (error) {
+        console.log('Error : ', error);
       }
     }
   }, [useWifi]);
 
+  console.log('wifiNetworks >>', wifiNetworks);
   const getLocation = async () => {
     // Get or prompt for API key first
     let currentApiKey = apiKey;
@@ -107,7 +118,7 @@ export function useGoogleProvider({
       }
 
       if (useWifi) {
-        if (wifiNetworks.length >= 2) {
+        if (wifiNetworks.length >= 0) {
           payload.wifiAccessPoints = wifiNetworks;
         } else {
           console.warn('[Google Provider] Insufficient WiFi access points available');
