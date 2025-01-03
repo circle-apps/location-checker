@@ -120,6 +120,7 @@ function App() {
 
     setError({ message, details });
     setLoading(false);
+    console.log('toastMessage', toastMessage);
     setToast({ message: toastMessage, type: 'error' });
   };
 
