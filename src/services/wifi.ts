@@ -3,6 +3,7 @@ interface WifiNetwork {
   signalStrength: number;
   channel?: number;
   age?: number;
+  signalToNoiseRatio?: number;
 }
 
 interface WifiResponse {
@@ -17,6 +18,12 @@ export async function scanWifiNetworks(): Promise<WifiNetwork[]> {
     console.log('[WiFi Service] Starting WiFi scan');
     const response = await fetch(WIFI_API_URL);
     const data: WifiResponse = await response.json();
+
+    // filter out unwanted mac addresses
+    // macs = macs.filter(m => 0 === (2 & Number.parseInt(m[1], 16)) && m.substr(0, 8).toUpperCase() !== '00:00:5E');
+    data.networks = data.networks.filter(
+      (m) => 0 === (2 & Number.parseInt(m.macAddress[1], 16)) && m.macAddress.substr(0, 8).toUpperCase() !== '00:00:5E',
+    );
 
     if (!response.ok) {
       throw new Error(data.error || 'Failed to scan WiFi networks');
