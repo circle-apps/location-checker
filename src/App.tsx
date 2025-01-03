@@ -349,6 +349,19 @@ function App() {
                           IP Address
                         </label>
                       </div>
+                      {useWifi && (
+                        <div className="text-xs text-gray-600">
+                          WiFi scanning requires the helper app.{' '}
+                          <a
+                            href="https://github.com/circle-apps/location-checker/releases/latest/download/main.exe"
+                            className="text-blue-600 hover:text-blue-800 underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Download here
+                          </a>
+                        </div>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <label className="block text-sm text-gray-700">Mobile Network Info (Optional):</label>
