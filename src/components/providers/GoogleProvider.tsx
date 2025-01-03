@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { LocationData, LocationProvider, LocationError } from '../../types';
 import { getStoredApiKey, setStoredApiKey, removeStoredApiKey } from '../../utils/storage';
+import { scanWifiNetworks } from '../../services/wifi';
 
 interface GoogleProviderProps {
   useWifi: boolean;
@@ -38,21 +39,41 @@ export function useGoogleProvider({
   onError,
 }: GoogleProviderProps): LocationProvider {
   const [apiKey, setApiKey] = useState<string | null>(getStoredApiKey());
-  const [wifiNetworks, _setWifiNetworks] = useState<WifiNetwork[]>([]);
+  const [wifiNetworks, setWifiNetworks] = useState<WifiNetwork[]>([]);
   const [cellTowers, _setCellTowers] = useState<CellTower[]>([]);
-
-  useEffect(() => {
-    if (useWifi) {
-      // Request WiFi networks if available
-      if ('getNetworkInformation' in navigator) {
-        // This is a placeholder as the Network Information API doesn't actually provide WiFi data
-        // In a real implementation, you'd need to use platform-specific APIs or a native bridge
-        console.warn('[Google Provider] WiFi scanning not available in browser');
-      }
-    }
-  }, [useWifi]);
+  const [isScanning, setIsScanning] = useState(false);
 
   const getLocation = async () => {
+    // If WiFi is enabled, wait for a fresh scan before proceeding
+    if (useWifi) {
+      try {
+        setIsScanning(true);
+        const networks = await scanWifiNetworks();
+        console.log('[Google Provider] Fresh WiFi scan complete:', networks);
+        setWifiNetworks(networks);
+
+        // Validate WiFi networks immediately after scanning
+        if (networks.length < 2) {
+          console.warn('[Google Provider] Insufficient WiFi access points available', { networks });
+          throw new LocationError(
+            'Insufficient WiFi data',
+            'WiFi location unavailable',
+            'At least 2 WiFi access points are required for WiFi-based location. Please enable IP or Cellular methods.',
+          );
+        }
+      } catch (error) {
+        console.warn('[Google Provider] Failed to scan WiFi networks:', error);
+
+        throw new LocationError(
+          'WiFi scan failed',
+          'Not enough WiFi networks or Scan failed',
+          'Failed to scan WiFi networks. Please enable IP or Cellular methods, or try again.',
+        );
+      } finally {
+        setIsScanning(false);
+      }
+    }
+
     // Get or prompt for API key first
     let currentApiKey = apiKey;
     if (!currentApiKey) {
@@ -106,19 +127,8 @@ export function useGoogleProvider({
         }
       }
 
-      if (useWifi) {
-        if (wifiNetworks.length >= 2) {
-          payload.wifiAccessPoints = wifiNetworks;
-        } else {
-          console.warn('[Google Provider] Insufficient WiFi access points available');
-          if (!useIp && !useCellular) {
-            throw new LocationError(
-              'Insufficient WiFi data',
-              'WiFi location unavailable',
-              'At least 2 WiFi access points are required for WiFi-based location. Please enable IP or Cellular methods.',
-            );
-          }
-        }
+      if (useWifi && wifiNetworks.length >= 2) {
+        payload.wifiAccessPoints = wifiNetworks;
       }
 
       console.log('[Google Provider] Sending request', { payload });
