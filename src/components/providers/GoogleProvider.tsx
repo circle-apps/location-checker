@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { LocationData, LocationProvider, LocationError } from '../../types';
 import { getStoredApiKey, setStoredApiKey, removeStoredApiKey } from '../../utils/storage';
 import { scanWifiNetworks } from '../../services/wifi';
@@ -39,20 +39,18 @@ export function useGoogleProvider({
   onError,
 }: GoogleProviderProps): LocationProvider {
   const [apiKey, setApiKey] = useState<string | null>(getStoredApiKey());
-  const [wifiNetworks, setWifiNetworks] = useState<WifiNetwork[]>([]);
   const [cellTowers, _setCellTowers] = useState<CellTower[]>([]);
-  const [isScanning, setIsScanning] = useState(false);
 
   const getLocation = async () => {
-    // If WiFi is enabled, wait for a fresh scan before proceeding
-    if (useWifi) {
-      try {
-        setIsScanning(true);
-        const networks = await scanWifiNetworks();
-        console.log('[Google Provider] Fresh WiFi scan complete:', networks);
-        setWifiNetworks(networks);
+    let networks: WifiNetwork[] = [];
 
-        // Validate WiFi networks immediately after scanning
+    if (useWifi) {
+      console.log('[Google Provider] Starting WiFi scan...');
+      try {
+        networks = await scanWifiNetworks();
+        console.log('[Google Provider] WiFi scan complete, networks found:', networks.length);
+
+        // Validation happens immediately after scan completes
         if (networks.length < 2) {
           console.warn('[Google Provider] Insufficient WiFi access points available', { networks });
           throw new LocationError(
@@ -63,14 +61,11 @@ export function useGoogleProvider({
         }
       } catch (error) {
         console.warn('[Google Provider] Failed to scan WiFi networks:', error);
-
         throw new LocationError(
           'WiFi scan failed',
           'Not enough WiFi networks or Scan failed',
           'Failed to scan WiFi networks. Please enable IP or Cellular methods, or try again.',
         );
-      } finally {
-        setIsScanning(false);
       }
     }
 
@@ -127,8 +122,8 @@ export function useGoogleProvider({
         }
       }
 
-      if (useWifi && wifiNetworks.length >= 2) {
-        payload.wifiAccessPoints = wifiNetworks;
+      if (useWifi && networks.length >= 2) {
+        payload.wifiAccessPoints = networks;
       }
 
       console.log('[Google Provider] Sending request', { payload });
