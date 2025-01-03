@@ -350,16 +350,21 @@ function App() {
                         </label>
                       </div>
                       {useWifi && (
-                        <div className="text-xs text-gray-600">
+                        <div className="text-xs text-gray-600 my-2">
                           WiFi scanning requires the helper app.{' '}
-                          <a
-                            href="https://github.com/circle-apps/location-checker/releases/latest/download/main.exe"
-                            className="text-blue-600 hover:text-blue-800 underline"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Download here
-                          </a>
+                          <div className="my-6">
+                            <a
+                              href="https://github.com/circle-apps/location-checker/releases/latest/download/main.exe"
+                              className="bg-violet-500 text-white p-2 rounded-md my-2 text-sm font-semibold inline-flex items-center justify-center gap-2"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Download exe
+                              <svg className="h-5 w-auto" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M5 20H19V18H5V20ZM19 9H15V3H9V9H5L12 16L19 9Z" fill="currentColor" />
+                              </svg>
+                            </a>
+                          </div>
                         </div>
                       )}
                     </div>
