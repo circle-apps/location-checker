@@ -279,7 +279,7 @@ function App() {
               value={currentProvider}
               onChange={(e) => handleProviderChange(e.target.value)}
             >
-              <option value="navigator">Device GPS/Location (Live)</option>
+              <option value="navigator">HTML5 Geolocation (Live)</option>
               <option value="google">Google Geolocation API</option>
               <option value="ip">IP-based Location</option>
             </select>
