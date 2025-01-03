@@ -77,9 +77,6 @@ def scan_wifi_macos() -> List[WifiNetwork]:
                     rssi = int(parts[2])
                     channel_str = parts[3]
 
-                    # Convert RSSI to signal strength percentage
-                    signal_strength = min(100, max(0, (rssi + 100) * 2))
-
                     # Extract channel number
                     channel_match = re.search(r'\d+', channel_str)
                     channel = int(channel_match.group()
@@ -87,11 +84,11 @@ def scan_wifi_macos() -> List[WifiNetwork]:
 
                     networks.append(WifiNetwork(
                         macAddress=mac_addr,
-                        signalStrength=int(signal_strength),
+                        signalStrength=rssi,
                         channel=channel
                     ))
                     logger.debug(
-                        f"Found network: MAC={mac_addr}, Signal={signal_strength}%, Channel={channel}")
+                        f"Found network: MAC={mac_addr}, Signal={rssi}dBm, Channel={channel}")
             except Exception as e:
                 logger.warning(f"Failed to parse line '{line}': {str(e)}")
                 continue
@@ -139,7 +136,11 @@ def scan_wifi_windows() -> List[WifiNetwork]:
             elif 'Signal' in line:
                 signal = re.search(r'(\d+)%', line)
                 if signal:
-                    current_network['signalStrength'] = int(signal.group(1))
+                    # Convert percentage to approximate dBm
+                    percentage = int(signal.group(1))
+                    signal_strength = -100 + \
+                        (percentage * 0.7)  # Rough approximation
+                    current_network['signalStrength'] = int(signal_strength)
             elif 'Channel' in line:
                 channel = re.search(r':\s*(\d+)', line)
                 if channel:
